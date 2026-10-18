@@ -120,7 +120,7 @@ details summary{cursor:pointer;font:700 16px "Trebuchet MS",Verdana,sans-serif}
   <div class="card">
     <h2>Attack the rival policy</h2>
     <p class="mut">Ask the other team for their policy code, paste it, and look for weak points.</p>
-    <p class="mut">Your policy code: <b id="mycode"></b></p>
+    <p class="mut">Your policy code (share it with your rival): <button class="ghost" id="cc" style="padding:4px 10px">Copy</button></p><p id="mycode" style="word-break:break-all;font:13px Consolas,monospace;margin:0 0 10px"></p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="rc" type="text" placeholder="Rival policy code" style="max-width:320px" aria-label="Rival policy code"><button class="ghost" id="rg">Compare</button></div>
     <div id="cmp" class="scroll" style="margin-top:12px"></div>
   </div>
@@ -130,14 +130,18 @@ details summary{cursor:pointer;font:700 16px "Trebuchet MS",Verdana,sans-serif}
 </main>
 <script>
 const $=id=>document.getElementById(id);
-const S=[
-{c:'SUN1',n:'Solara',r:'Democracy',g:'People first',t:62,au:0,w:[1,2,3],m:[40,50,60],b:'A prosperous democracy with strong unions. Voters punish visible price rises, and the government promised that no household will end up worse off.'},
-{c:'OAK2',n:'Verdania',r:'Democracy',g:'Planet first',t:55,au:0,w:[3,2,1],m:[65,40,40],b:'A democracy hit by record heatwaves. Parliament set a binding 2035 emissions target, but the government must still win the next election.'},
-{c:'STONE3',n:'Ironia',r:'Authoritarian state',g:'Planet first',t:30,au:1,w:[4,.5,1],m:[70,20,30],b:'A one-party state with a state-led energy sector. It can enforce rules fast, yet visible hardship has triggered local strikes before.'},
-{c:'RIVER4',n:'Meridia',r:'Authoritarian state',g:'People first',t:35,au:1,w:[1,1,4],m:[35,30,65],b:'A centralised state whose legitimacy rests on stable prices and jobs. Leaders want to look green abroad without hurting poor households.'},
-{c:'ALPS5',n:'Helvetia',r:'Direct democracy',g:'Balanced',t:70,au:0,w:[2,3,2],m:[50,55,50],b:'Any measure can go to a referendum, and anything below 55 acceptability will be voted down. Trust in institutions is high.'},
-{c:'DELTA6',n:'Costara',r:'Middle-income democracy',g:'Balanced',t:45,au:0,w:[2,2,3],m:[45,45,55],b:'Few public transport options, many car-dependent households and a tight budget. Poor households spend a large share of income on energy.'}
-];
+/*BLOB-START*/const B={"salt":"e277dMCSawha0OM9ZG5MFQ==","it":300000,"E":[{"h":"69c490bd346ddaa2f551135bce40f7b2ffa40e99dbe5204d819554a2dc48c015","iv":"fm2bJ8aOEO7LdxSq","ct":"nPsT5ptvcfPTQG+9nUtq89FDPQHSk6nctAcMJYhuIs+1ykT5RKkwtI6wLHgTOrh1xD7oRm+yGHZu37DqhwYEWC8usuAmD0QC7MaO0ZQBS82w21Ddbl2+sknWCuK8n9p2H5ky7pnMKSAl8M9ikIHKOgqtuMlKQZT896v7VbUPQf5MNiEOVyxbhYCUUyfH0XlVcmSBF535h1LnYkK4r+v0OlROC5bQd0gSjCs0zFe3Eb4rXIqwFWK/ftVhlcoCqLhr+zUW/yG9ZeS4Ur30tX2fn+zoU2HSqRQvPEfnasuou98w5jShq2z/quHURwL4eAZiEf8orBGhqGHjA92/muqo2fE/YmAdg1ooR8TwFzeY"},{"h":"5beca51fc10b3dc5acf46fac99c718ecb429896b297e3b5de3a4e50795e7dbf2","iv":"zWE3otGYeMrlXtaq","ct":"6W99l3y6JK6qlgRE4qo8EHQ9xRHFp4SK1+b+/jXU8u9ABhj3OZSD6rMYhIS3Sb0M3Xjr3AWEX5hxNYKJ5MgLrdEMBQiKoJM3FMip1DzhXTyn3yRJ+WPp/g212ZJSI7h/c6yoDHNsbF6bdUvAd8s6E1UMaznsWnq6NiibcbIrZit82U1HL02ywee7kkKM0vTTIAFCahZYJ2lXeQbYYaG7mPujdq4pbyZFVAbj2/Tl8kLmd5+LkrpYziHLQ3dTpkpQJLX0l82kLzbeBqyKlKVo/6Bms5BUx/Y9w3snl+n5ZtWuXrLPsma6OKj+oiRY7Rg8A/bMk9/BHkczAYvVPXtGWijU4W/BLIA="},{"h":"3dc7ab0995e70f24d06bf7efb670fbbe19a9eb7b056167ca265b02ca7e328242","iv":"kWW5LFnB58ZgD0oz","ct":"zvWZjfxDIlRGWzvS0phCqPqhrkxZSKsJFfTC+6XqI3pZJj/7r3+1DseLXfpKkrBON4KvZPPDP/mSun0vANHkvJzS2/a+ljNwnY9cNc0ScS69bieBa8ViaI1Q0unVE4MEiT8+1LXcV5FfqNJlxzvUwICTGX8atdz+K8ow/T6Z9ylw57VcgUKySlDi3aO9uSf6MbRtsTtbRvAISb7y5RWHLLvinr3g47w2WqGMWLZB5SfxZEmxkyXlcFyV9CJCDArFEwyih/y3Fh/EME5H6km3s/QQZN4bRtuY9OjQ0gfl+VGsoED30xIu2ICTdSHe1us61AaqYyPWvBAknSk9Ye2hq6VZbbLMEeGhPmCRSdmdDw=="},{"h":"79e2523e6d50a17ae47a4d60144e39dd562fe21fe2b5079dd3d5f620f990a888","iv":"oo78MJPxkankFUeu","ct":"4UzCOPkALwEmqoyCWWHjpzLiF/bLbrlPAyCowgQNPJXsCyaQQYQM4vVGsdlf5jtEzrQb0BqeZjKqTUYhPZfGdr71psrZlcv9tlpm4HkauqNgRSpE5K25GHFwa5/7s7o+NhJMYp/aS/0jl7j9+cV5iHvIM7jXbXo2/0GMhPmLTxQ3p/ts/wtcn1NU8bXqqyAz5EWIVwTtmB4tB/VoKPcs4OrNUxIdIRqPiYXQlYM9wvkJUs1UuCSiq5BJa2iySP3bu0WBsq0kjRRgrSR6aHCJZtyvPtXNfdGnLo8Zgi5/CtcT3cttGVucxuilri8CrqXJDiTJ8vrBST0Kzx+0aTo0SYzdO7Q+TtNc27sju8xHsFzQ"},{"h":"6563853d696c4ce393bdb51f1310baa018d8f0cfc9f794e73a8baad32bb6eb95","iv":"+wEg+f9kR1q08NKl","ct":"/hTSwtfMgi9j/l/CBigiU6gwjZmbhMzAZJ56Pu10GF5BAuIJv9H78iTH8A/vKdIVobQrsQGxQpB+cr/r+thO7xoURmAMHxuJNLRGFCljnNmQrRsEyhETITJAfQvrh43rDslvwcn1WKuFJ4YqBmysaRa7ceHyf8c/jYt0ezYKS5Jz1r+C8AJLbkjkOvFz+xlMJPME4IE3Z67D2yW91IvKPGNYPSqPUMAAd/RCWoCmO8Fdi+5EJJa5/NJB2T47PyE0PvF4xXHBVZVLOXpj4yRafrJoQ9pSrdVz7eoZSBTTBxNk1x5c7/QgIdlVtokyq+X8ocJXxo2TN+6032JK"},{"h":"81621df1fb7310e85cc34cafa692927b172c9444eec66d131853ab3f7a776c46","iv":"EoLCnlLaxt165Cwq","ct":"ynEv92JKWAqPaXBr7/IcIPiAzHwZuk5IOpUP1nJy7M4iL68XMSX53Pspj18Psjay6sLNgjyN9Sv/VqnahizZRpYNQTNiaYQW2Bkgn4pXQHK722HCneNobeb41xbyX/xYNnmHcLG4oye8iEWVN1zy7GGsgTN1kJanB45d9vs4JJfXfTzDRhvpdLMEdYa8b8Se3QhTse/ArZyI+r/78PJ7/3DENhibYt3SR7cgQr4h+GvmbmDq13zNVASr6CLtWnCdQEneBVifTvmBb9sAcp4VltW7/SC675x56uGudAvaSL2NeMCNSLClOh1fRkaGAiP53L45c2K9d2N/ENOMIooLcV5d0yTSZZO3ay0BF01mfsks"},{"h":"64e7e9ed1aeb1b42eda84ebce68a43d0abb7b1cfcbab9e73e812fb5b3fbeefce","iv":"boPIntHnBBXZOJqN","ct":"sld7JKgdplW98z6jR8xOp+BQks9R9k1yZ4aX+zc+25yI5ygrxZRB4lzgAxJYKkqid5PkMy8OmYfvDwPwlG0AP8X7dSHKVPTYEnCu9zDkKgh/iNGFe9G1vb/kUOK2Wm+JbI9O5KeLWwvsozVmeCTp9uPqKgJc25VzGzd2TiKi9yM3AsWJnE6OQ4dJMtkiGWr8PU996XDCU7U/gZWWe5jJNlzGjt65ITA4c6gbB13gQvZOZsoCJV5WgwTLunYLgoXezzv2RnmhS/prGm6u6/FJHUCBAYbRvpSXpirLVS4Oc/qkhoplKmhWY2OTsbQ2G7qGqfmpx/rcbWsAm/XfBxqLdePoZ8a+bXnv2uvGFHeWGNNZCfbF7ckgTVWx4j1XpTKoEU3zUP/wjtLxs/0YnUvkh/mj9wKw+he+ZUBummY6Rd88PaiFP8Hpm+zhHFpFVdDFYOX9Pk22MoHstreOWPYYsPUdneCFsRx8KTdUKUNjsriVd/0MV2sLA3udIT4GVTp3B0tDIe31jluvYBr/0JCNXtGZKfqVk48qaW0mAtizz3VDxDQxoevwK2BMS9Q5cmjThFf3hecf"}]};/*BLOB-END*/
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const hex=u=>[...u].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function openCode(code){
+  const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(code.trim().toUpperCase()),'PBKDF2',false,['deriveBits']);
+  const d=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:b64(B.salt),iterations:B.it},k0,512));
+  const e=B.E.find(x=>x.h===hex(d.slice(32)));
+  if(!e)return null;
+  const key=await crypto.subtle.importKey('raw',d.slice(0,32),'AES-GCM',false,['decrypt']);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},key,b64(e.ct))));
+}
 const I={tax:{n:'Carbon tax',e:.85,a:45,pa:.45,q:40,pq:.3},quota:{n:'Cap-and-trade quota',e:1,a:55,pa:.35,q:40,pq:.3},ban:{n:'Regulation or ban',e:.8,a:62,pa:.3,q:48,pq:.2},sub:{n:'Subsidy',e:.45,a:72,pa:.1,q:32,pq:.1}};
 const R={equal:{n:'equal cash dividend',a:14,q:28},prog:{n:'dividend for the poorest 50%',a:12,q:38},green:{n:'green spending',a:15,q:8},gen:{n:'general budget',a:-6,q:0}};
 const E=[
@@ -178,12 +182,14 @@ function hints(p,r,s){
   if(r.a<35)h.push(s.au?'Acceptability is very low. Repression is costly and strikes can force a reversal.':'Acceptability is below 35. Expect protests and a political reversal, as in France in 2018.');
   return h;
 }
-function enc(p){return[sc.c,p.i,p.s,p.r,[p.tr,p.in,p.gr,p.ca,p.ru].join('')].join('-')}
+function enc(p){const r=calc(p,sc);return btoa(JSON.stringify({n:sc.n,y:sc.r,g:sc.g,u:sc.au,m:sc.m,i:p.i,s:p.s,v:p.r,f:[p.tr,p.in,p.gr,p.ca,p.ru].join(''),k:[r.e,r.a,r.q]}))}
 function dec(t){
-  const x=t.trim().split('-');if(x.length!==5)return null;
-  const s=S.find(o=>o.c===x[0].toUpperCase());if(!s||!I[x[1]]||!R[x[3]]||!/^[01]{5}$/.test(x[4]))return null;
-  const f=x[4].split('').map(Number);
-  return{s,p:{i:x[1],s:Math.max(0,Math.min(100,+x[2]||0)),r:x[3],tr:f[0],in:f[1],gr:f[2],ca:f[3],ru:f[4]}};
+  try{
+    const o=JSON.parse(atob(t.trim()));
+    if(!I[o.i]||!R[o.v]||!/^[01]{5}$/.test(o.f)||!Array.isArray(o.k)||!Array.isArray(o.m))return null;
+    const f=o.f.split('').map(Number),k=o.k.map(Number),m=o.m.map(Number);
+    return{s:{n:String(o.n),r:String(o.y),g:String(o.g),au:+o.u,m},p:{i:o.i,s:Math.max(0,Math.min(100,+o.s||0)),r:o.v,tr:f[0],in:f[1],gr:f[2],ca:f[3],ru:f[4]},r:{e:k[0],a:k[1],q:k[2],ok:[k[0]>=m[0],k[1]>=m[1],k[2]>=m[2]]}};
+  }catch(e){return null}
 }
 function desc(p){
   const tq=p.i==='tax'||p.i==='quota',on=[p.tr&&'transport first',p.in&&'insulation aid',p.ru&&'rural compensation',p.gr&&'gradual phase-in',p.ca&&'explanation campaign'].filter(Boolean);
@@ -200,11 +206,15 @@ function render(){
   $('hints').innerHTML=hints(p,r,sc).map(t=>'<div class="hint">'+t+'</div>').join('');
   $('mycode').textContent=enc(p);
 }
-function unlock(){
-  const v=$('code').value.trim().toUpperCase();
-  if(v==='HOST'){$('host').classList.remove('hidden');$('host').innerHTML='<table><tr><th>Code</th><th>Country</th><th>Regime</th><th>Priority</th></tr>'+S.map(o=>'<tr><td><b>'+o.c+'</b></td><td>'+o.n+'</td><td>'+o.r+'</td><td>'+o.g+'</td></tr>').join('')+'</table>';$('gerr').textContent='';return}
-  const s=S.find(o=>o.c===v);
+async function unlock(){
+  const v=$('code').value.trim();if(!v)return;
+  $('gerr').textContent='Checking the code…';$('go').disabled=true;
+  let s=null;
+  try{s=await openCode(v)}catch(e){$('gerr').textContent='Your browser could not run the check. Open the page over https.';$('go').disabled=false;return}
+  $('go').disabled=false;
   if(!s){$('gerr').textContent='Code not found. Check the spelling or ask your facilitator.';return}
+  $('gerr').textContent='';
+  if(s.host){$('host').classList.remove('hidden');$('host').innerHTML='<table><tr><th>Code</th><th>Country</th><th>Regime</th><th>Priority</th></tr>'+s.host.map(o=>'<tr><td><b>'+esc(o.c)+'</b></td><td>'+esc(o.n)+'</td><td>'+esc(o.r)+'</td><td>'+esc(o.g)+'</td></tr>').join('')+'</table>';return}
   sc=s;$('gate').classList.add('hidden');$('app').classList.remove('hidden');
   $('brief').innerHTML='<h2>'+s.n+': '+s.r+', '+s.g.toLowerCase()+'</h2><p>'+s.b+'</p><p class="mut" style="margin:0">Your government will judge a policy by effectiveness, acceptability and equity, with weights '+s.w.join(' : ')+'. It must meet the three minimum scores shown on the scorecard.</p>';
   render();
@@ -222,11 +232,12 @@ $('mk').onclick=()=>{
 $('cp').onclick=async()=>{try{await navigator.clipboard.writeText($('sheet').textContent);$('cps').textContent='Copied.'}catch(e){$('cps').textContent='Select the text and copy it manually.'}};
 $('rg').onclick=()=>{
   const d=dec($('rc').value),box=$('cmp');
-  if(!d){box.innerHTML='<p class="n">That code is not valid. It looks like SUN1-tax-40-equal-01010.</p>';return}
-  const mine=calc(P(),sc),rv=calc(d.p,d.s),L=['Effectiveness','Acceptability','Equity'],K=['e','a','q'];
-  box.innerHTML='<p><b>'+d.s.n+'</b> ('+d.s.r+', '+d.s.g.toLowerCase()+'): '+desc(d.p)+'</p><table><tr><th>Metric</th><th>You</th><th>Rival</th><th>Rival mandate</th></tr>'+K.map((k,j)=>'<tr><td>'+L[j]+'</td><td>'+mine[k]+'</td><td>'+rv[k]+'</td><td class="'+(rv.ok[j]?'y':'n')+'">≥ '+d.s.m[j]+(rv.ok[j]?' ✓':' ✗')+'</td></tr>').join('')+'</table>'
+  if(!d){box.innerHTML='<p class="n">That code is not valid. Paste the full policy code your rival copied.</p>';return}
+  const mine=calc(P(),sc),rv=d.r,L=['Effectiveness','Acceptability','Equity'],K=['e','a','q'];
+  box.innerHTML='<p><b>'+esc(d.s.n)+'</b> ('+esc(d.s.r)+', '+esc(d.s.g.toLowerCase())+'): '+esc(desc(d.p))+'</p><table><tr><th>Metric</th><th>You</th><th>Rival</th><th>Rival mandate</th></tr>'+K.map((k,j)=>'<tr><td>'+L[j]+'</td><td>'+mine[k]+'</td><td>'+rv[k]+'</td><td class="'+(rv.ok[j]?'y':'n')+'">≥ '+d.s.m[j]+(rv.ok[j]?' ✓':' ✗')+'</td></tr>').join('')+'</table>'
   +hints(d.p,rv,d.s).map(t=>'<div class="hint"><b>Attack point:</b> '+t+'</div>').join('');
 };
+$('cc').onclick=async()=>{try{await navigator.clipboard.writeText($('mycode').textContent);$('cc').textContent='Copied'}catch(e){$('cc').textContent='Select and copy'}};
 </script>
 </body>
 </html>
