@@ -61,6 +61,7 @@ details summary{cursor:pointer;font:700 16px "Trebuchet MS",Verdana,sans-serif}
 </section>
 
 <section id="app" class="hidden">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="ghost" id="rst" style="padding:6px 12px">Wrong team? Start over</button></div>
   <div class="card" id="brief"></div>
   <div class="grid">
     <div>
@@ -118,11 +119,22 @@ details summary{cursor:pointer;font:700 16px "Trebuchet MS",Verdana,sans-serif}
   </div>
 
   <div class="card">
+    <h2>Class board</h2>
+    <p class="mut">Publish your policy and your three arguments so rival teams can attack them. Everyone who opens this page today sees the same board. It keeps entries for about 12 hours.</p>
+    <button id="bp" disabled>Publish policy and arguments</button>
+    <p class="mut" id="bs" style="margin-top:8px" aria-live="polite"></p>
+    <div id="bl" class="scroll"></div>
+  </div>
+
+  <div class="card">
     <h2>Attack the rival policy</h2>
-    <p class="mut">Ask the other team for their policy code, paste it, and look for weak points.</p>
-    <p class="mut">Your policy code (share it with your rival): <button class="ghost" id="cc" style="padding:4px 10px">Copy</button></p><p id="mycode" style="word-break:break-all;font:13px Consolas,monospace;margin:0 0 10px"></p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="rc" type="text" placeholder="Rival policy code" style="max-width:320px" aria-label="Rival policy code"><button class="ghost" id="rg">Compare</button></div>
+    <p class="mut">Choose a rival team from today's board, read their policy and arguments, and look for weak points.</p>
+    <select id="rs" aria-label="Rival team" style="max-width:420px"><option value="">No rivals on the board yet</option></select>
     <div id="cmp" class="scroll" style="margin-top:12px"></div>
+    <details style="margin-top:12px"><summary style="font-size:14px">No connection? Swap policy codes by hand</summary>
+      <p class="mut" style="margin-top:8px">Your policy code: <button class="ghost" id="cc" style="padding:4px 10px">Copy</button></p><p id="mycode" style="word-break:break-all;font:13px Consolas,monospace;margin:0 0 10px"></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="rc" type="text" placeholder="Rival policy code" style="max-width:320px" aria-label="Rival policy code"><button class="ghost" id="rg">Compare</button></div>
+    </details>
   </div>
 
   <details class="card"><summary>Evidence library</summary><div id="lib" style="margin-top:10px"></div></details>
@@ -212,16 +224,98 @@ async function unlock(){
   let s=null;
   try{s=await openCode(v)}catch(e){$('gerr').textContent='Your browser could not run the check. Open the page over https.';$('go').disabled=false;return}
   $('go').disabled=false;
-  if(!s){$('gerr').textContent='Code not found. Check the spelling or ask your facilitator.';return}
+  if(!s){$('gerr').textContent='Code not found. Check the spelling or ask your facilitator.';try{localStorage.removeItem('pl-team')}catch(e){}return}
   $('gerr').textContent='';
   if(s.host){$('host').classList.remove('hidden');$('host').innerHTML='<table><tr><th>Code</th><th>Country</th><th>Regime</th><th>Priority</th></tr>'+s.host.map(o=>'<tr><td><b>'+esc(o.c)+'</b></td><td>'+esc(o.n)+'</td><td>'+esc(o.r)+'</td><td>'+esc(o.g)+'</td></tr>').join('')+'</table>';return}
   sc=s;$('gate').classList.add('hidden');$('app').classList.remove('hidden');
   $('brief').innerHTML='<h2>'+s.n+': '+s.r+', '+s.g.toLowerCase()+'</h2><p>'+s.b+'</p><p class="mut" style="margin:0">Your government will judge a policy by effectiveness, acceptability and equity, with weights '+s.w.join(' : ')+'. It must meet the three minimum scores shown on the scorecard.</p>';
+  try{localStorage.setItem('pl-team',v);const o=JSON.parse(localStorage.getItem(SK()));if(o)restore(o)}catch(e){}
   render();
+  if(!bt)openBoard();
+}
+const SK=()=>'pl-s:'+sc.n,CB=['tr','in','gr','ca','ru'];
+let pub=false;
+function save(){
+  if(!sc)return;
+  const o={i:document.querySelector('input[name=i]:checked').value,s:$('s').value,r:$('r').value,f:CB.map(k=>$(k).checked),a:[1,2,3].map(k=>$('a'+k).value),e:[1,2,3].map(k=>$('e'+k).value),pub};
+  try{localStorage.setItem(SK(),JSON.stringify(o))}catch(e){}
+}
+function restore(o){
+  const r=document.querySelector('input[name=i][value="'+o.i+'"]');if(r)r.checked=true;
+  $('s').value=o.s;if(R[o.r])$('r').value=o.r;
+  CB.forEach((k,j)=>{$(k).checked=!!(o.f&&o.f[j])});
+  [1,2,3].forEach(k=>{$('a'+k).value=o.a&&o.a[k-1]||'';$('e'+k).value=o.e&&E[o.e[k-1]]?o.e[k-1]:''});
+  pub=!!o.pub;
+}
+const NTFY='https://ntfy.sh/',BP={},DEL={};
+let bt=null,bk=null,bes=null,me=null;
+try{me=localStorage.getItem('pl-me')}catch(e){}
+if(!me){me=hex(crypto.getRandomValues(new Uint8Array(8)));try{localStorage.setItem('pl-me',me)}catch(e){}}
+const myId=()=>me+':'+sc.n;
+const u64=u=>btoa(String.fromCharCode(...u));
+const sha=async s=>new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)));
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const zip=async(u,t)=>new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(t)).arrayBuffer());
+async function seal(o){
+  const iv=crypto.getRandomValues(new Uint8Array(12)),z=await zip(new TextEncoder().encode(JSON.stringify(o)),new CompressionStream('deflate-raw'));
+  return JSON.stringify({iv:u64(iv),ct:u64(new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},bk,z)))});
+}
+async function unseal(s){
+  const x=JSON.parse(s),z=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(x.iv)},bk,b64(x.ct)));
+  return JSON.parse(new TextDecoder().decode(await zip(z,new DecompressionStream('deflate-raw'))));
+}
+async function openBoard(){
+  const day=today();
+  bt='policylab-'+hex(await sha('topic|'+B.salt+'|'+day)).slice(0,32);
+  bk=await crypto.subtle.importKey('raw',await sha('key|'+B.salt+'|'+day),'AES-GCM',false,['encrypt','decrypt']);
+  $('bs').textContent='Connecting…';drawBoard();
+  bes=new EventSource(NTFY+bt+'/sse?since=all');
+  bes.onopen=()=>{$('bs').textContent='Board for '+day+' is open. New policies appear here automatically.';$('bp').disabled=false};
+  bes.onerror=()=>{$('bs').textContent='Connection lost. Reconnecting…'};
+  bes.onmessage=async ev=>{
+    let m,o;try{m=JSON.parse(ev.data);if(m.event!=='message')return;o=await unseal(m.message)}catch(e){return}
+    if(!o||typeof o.id!=='string'||!/^[0-9a-f]{16}:/.test(o.id))return;
+    if(o.x===1){if(!BP[o.id]||BP[o.id].time<=m.time){delete BP[o.id];DEL[o.id]=m.time;if($('rs').value===o.id)$('cmp').innerHTML='';drawBoard()}return}
+    const d=typeof o.c==='string'&&dec(o.c);
+    if(!d||(BP[o.id]&&BP[o.id].time>=m.time)||DEL[o.id]>=m.time)return;
+    const a=(Array.isArray(o.a)?o.a:[]).slice(0,3).map(x=>({t:x&&typeof x.t==='string'?x.t.slice(0,AL):'',e:E[x&&x.e]&&Number.isInteger(x.e)?x.e:''}));
+    BP[o.id]={d,c:o.c,a,time:m.time};drawBoard();
+    if($('rs').value===o.id)compare(d,a);
+  };
+}
+const AL=3000;
+const myArgs=()=>[1,2,3].map(k=>({t:$('a'+k).value.trim().slice(0,AL),e:$('e'+k).value===''?'':+$('e'+k).value}));
+function drawBoard(){
+  const L=Object.entries(BP).sort((a,b)=>b[1].time-a[1].time);
+  const R=L.filter(([id])=>id!==myId()),cur=$('rs').value;
+  $('rs').innerHTML='<option value="">'+(R.length?'Choose a rival…':'No rivals on the board yet')+'</option>'+R.map(([id,x])=>'<option value="'+esc(id)+'">'+esc(x.d.s.n)+': '+esc(I[x.d.p.i].n)+'</option>').join('');
+  if(BP[cur]&&cur!==myId())$('rs').value=cur;
+  if(!bt){$('bl').innerHTML='';return}
+  if(!L.length){$('bl').innerHTML='<p class="mut">No policies published yet.</p>';return}
+  $('bl').innerHTML='<table><tr><th>Team</th><th>Policy</th><th>Published</th><th></th></tr>'+L.map(([id,x])=>'<tr><td><b>'+esc(x.d.s.n)+'</b>'+(id===myId()?' <span class="role">you</span>':'')+'</td><td>'+esc(desc(x.d.p))+'</td><td>'+new Date(x.time*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</td><td>'+(id===myId()?'':'<button class="ghost" data-id="'+esc(id)+'" style="padding:4px 10px">Compare</button>')+'</td></tr>').join('')+'</table>';
+}
+$('bp').onclick=async()=>{
+  if(!bt||!sc)return;
+  $('bp').disabled=true;$('bs').textContent='Publishing…';
+  try{
+    const body=await seal({id:myId(),c:enc(P()),a:myArgs()});
+    if(new TextEncoder().encode(body).length>4000)throw new Error('size');
+    const r=await fetch(NTFY+bt,{method:'POST',body,signal:AbortSignal.timeout(15000)});
+    if(!r.ok)throw new Error(r.status);
+    pub=true;save();
+    $('bs').textContent='Published. If you change your policy or arguments, publish again and the board shows your latest version.';
+  }catch(e){$('bs').textContent=e.message==='size'?'Your arguments are too long to publish. Shorten them and try again.':e.message==='429'?'Too many requests from this network. Wait a minute and try again.':'Could not publish. Check your connection and try again.'}
+  $('bp').disabled=false;
+};
+const pickRival=id=>{if(!BP[id])return;$('rs').value=id;compare(BP[id].d,BP[id].a)};
+$('rs').onchange=()=>{const id=$('rs').value;id?pickRival(id):$('cmp').innerHTML=''};
+$('bl').onclick=e=>{
+  const id=e.target.dataset&&e.target.dataset.id;if(!id||!BP[id])return;
+  pickRival(id);$('rs').scrollIntoView({behavior:'smooth',block:'start'});
 }
 $('go').onclick=unlock;$('code').onkeydown=e=>{if(e.key==='Enter')unlock()};
 document.querySelectorAll('input,select').forEach(el=>{if(el.id!=='code'&&el.id!=='rc')el.addEventListener('input',()=>sc&&render())});
-$('args').innerHTML=[1,2,3].map(k=>'<div style="margin-bottom:12px"><label for="a'+k+'"><b>Argument '+k+'</b></label><textarea id="a'+k+'" placeholder="One clear claim with a reason"></textarea><select id="e'+k+'" aria-label="Evidence for argument '+k+'"><option value="">Attach evidence…</option>'+E.map((x,j)=>'<option value="'+j+'">'+x[0]+': '+x[1].slice(0,60)+'…</option>').join('')+'</select></div>').join('');
+$('args').innerHTML=[1,2,3].map(k=>'<div style="margin-bottom:12px"><label for="a'+k+'"><b>Argument '+k+'</b></label><textarea id="a'+k+'" maxlength="3000" placeholder="One clear claim with a reason"></textarea><select id="e'+k+'" aria-label="Evidence for argument '+k+'"><option value="">Attach evidence…</option>'+E.map((x,j)=>'<option value="'+j+'">'+x[0]+': '+x[1].slice(0,60)+'…</option>').join('')+'</select></div>').join('');
 $('lib').innerHTML=E.map(x=>'<p><b>'+x[0]+'.</b> '+x[1]+'</p>').join('');
 $('mk').onclick=()=>{
   const p=P(),r=calc(p,sc);
@@ -230,13 +324,24 @@ $('mk').onclick=()=>{
   $('sheet').textContent=t;$('sheet').classList.remove('hidden');$('cpm').classList.remove('hidden');
 };
 $('cp').onclick=async()=>{try{await navigator.clipboard.writeText($('sheet').textContent);$('cps').textContent='Copied.'}catch(e){$('cps').textContent='Select the text and copy it manually.'}};
-$('rg').onclick=()=>{
-  const d=dec($('rc').value),box=$('cmp');
+$('rg').onclick=()=>{$('rs').value='';compare(dec($('rc').value))};
+function compare(d,a){
+  const box=$('cmp');
   if(!d){box.innerHTML='<p class="n">That code is not valid. Paste the full policy code your rival copied.</p>';return}
   const mine=calc(P(),sc),rv=d.r,L=['Effectiveness','Acceptability','Equity'],K=['e','a','q'];
   box.innerHTML='<p><b>'+esc(d.s.n)+'</b> ('+esc(d.s.r)+', '+esc(d.s.g.toLowerCase())+'): '+esc(desc(d.p))+'</p><table><tr><th>Metric</th><th>You</th><th>Rival</th><th>Rival mandate</th></tr>'+K.map((k,j)=>'<tr><td>'+L[j]+'</td><td>'+mine[k]+'</td><td>'+rv[k]+'</td><td class="'+(rv.ok[j]?'y':'n')+'">≥ '+d.s.m[j]+(rv.ok[j]?' ✓':' ✗')+'</td></tr>').join('')+'</table>'
-  +hints(d.p,rv,d.s).map(t=>'<div class="hint"><b>Attack point:</b> '+t+'</div>').join('');
+  +hints(d.p,rv,d.s).map(t=>'<div class="hint"><b>Attack point:</b> '+t+'</div>').join('')
+  +(a?'<h2 style="margin-top:16px">Their arguments</h2>'+a.map((x,k)=>'<p><b>Argument '+(k+1)+':</b> '+(x.t?esc(x.t):'<span class="mut">(empty)</span>')+(x.e!==''?'<br><span class="mut">Evidence – '+esc(E[x.e][0])+': '+esc(E[x.e][1])+'</span>':'<br><span class="n">No evidence attached.</span>')+'</p>').join(''):'');
+}
+$('app').addEventListener('input',save);$('app').addEventListener('change',save);
+$('rst').onclick=async()=>{
+  if(!confirm('Leave '+sc.n+'? Your choices and arguments on this device will be cleared'+(pub?' and your entry will be removed from the board':'')+'.'))return;
+  $('rst').disabled=true;
+  if(pub&&bt)try{await fetch(NTFY+bt,{method:'POST',body:await seal({id:myId(),x:1}),signal:AbortSignal.timeout(8000)})}catch(e){}
+  try{localStorage.removeItem(SK());localStorage.removeItem('pl-team')}catch(e){}
+  location.reload();
 };
+try{const t=localStorage.getItem('pl-team');if(t){$('code').value=t;unlock()}}catch(e){}
 $('cc').onclick=async()=>{try{await navigator.clipboard.writeText($('mycode').textContent);$('cc').textContent='Copied'}catch(e){$('cc').textContent='Select and copy'}};
 </script>
 </body>
